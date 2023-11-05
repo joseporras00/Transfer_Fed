@@ -8,7 +8,6 @@ import tensorflow as tf
 from tensorflow.keras import backend as K
 from sklearn.metrics import roc_curve
 from preparas_SEQ import generate_data_semanal
-from utils import *
 from redes import bilstm
 
 EPOCHS=150
