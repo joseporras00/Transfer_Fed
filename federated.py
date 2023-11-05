@@ -4,25 +4,22 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils.class_weight import compute_class_weight
 from keras_preprocessing.sequence import pad_sequences
 from metricas import model_evaluation
-from sklearn.model_selection import StratifiedKFold
-
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Masking, LSTM, Bidirectional, Dense
-from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import backend as K
 from sklearn.metrics import roc_curve
-
 from preparas_SEQ import generate_data_semanal
 from utils import *
 from redes import bilstm
 
+EPOCHS=150
+BATCH=64
+VS=0.25
 es = tf.keras.callbacks.EarlyStopping(monitor='val_auc', verbose=1,patience=10,mode='min',restore_best_weights=True)
 ######################################################################
 auc=[]
 ########################################################################
 
-def batch_data(data_shard, bs=64):
+def batch_data(data_shard, bs=BATCH):
     """
     Make a dataset that shuffles and batches the data.
     
@@ -108,11 +105,11 @@ for rs in range(10):
             class_weights_client = class_weights.get(client, None)  # obtain weights to the client
 
             if client=='client1':
-                local_model.fit(client_data, batch_size=64 ,epochs=100, validation_data=(X_val, y_val),callbacks=[es], verbose=0, class_weight=class_weights_client)
+                local_model.fit(client_data, batch_size=BATCH ,epochs=EPOCHS, validation_data=(X_val, y_val),callbacks=[es], verbose=0, class_weight=class_weights_client)
             elif client=='client2':
-                local_model.fit(client_data, batch_size=64 ,epochs=100, validation_data=(X2_val, y2_val),callbacks=[es], verbose=0, class_weight=class_weights_client)
+                local_model.fit(client_data, batch_size=BATCH ,epochs=EPOCHS, validation_data=(X2_val, y2_val),callbacks=[es], verbose=0, class_weight=class_weights_client)
             elif client=='client3':
-                local_model.fit(client_data, batch_size=64 ,epochs=100, validation_data=(X3_val, y3_val),callbacks=[es], verbose=0, class_weight=class_weights_client)
+                local_model.fit(client_data, batch_size=BATCH ,epochs=EPOCHS, validation_data=(X3_val, y3_val),callbacks=[es], verbose=0, class_weight=class_weights_client)
             
             scaling_factor = weight_scalling_factor(clients_batched, client)
             scaled_weights = scale_model_weights(local_model.get_weights(), scaling_factor)

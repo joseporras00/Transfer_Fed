@@ -44,9 +44,6 @@ def generate_data_semanal(file):
     # Leer el archivo CSV
     df = pd.read_csv(f'{file}',header=0, index_col=0)
     
-    #Eliminamos columnas innecesarias    
-    df=df.drop(columns=['price','course_type','international','activa_no_bonificable','enrolment_type'])
-    
     # Se inicializan las listas
     X_local = []
     y_local=[]

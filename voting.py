@@ -13,7 +13,7 @@ from keras_preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 import tensorflow
 
-EPOCHS=50
+EPOCHS=150
 BATCH=64
 VS=0.25
 es = tensorflow.keras.callbacks.EarlyStopping(monitor='val_cohen_kappa', verbose=1,patience=5,mode='max',restore_best_weights=True)
@@ -56,7 +56,7 @@ def evaluate_model(X, y, aucs, n_folds=10, X_val=None, y_val=None):
         model2=load_model('model2.h5')
         model3=load_model('model3.h5')
         
-        models=[model2,model2]
+        models=[model2,model3]
         y_pred=None
         for model in models:
                 if model==models[0]:

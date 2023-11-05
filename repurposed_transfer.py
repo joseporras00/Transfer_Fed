@@ -6,7 +6,6 @@ from sklearn.metrics import roc_curve
 from metricas import model_evaluation
 from preparas_SEQ import generate_data_semanal
 from sklearn.utils.class_weight import compute_class_weight
-from metricas import model_evaluation
 from keras_preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 from sklearn.model_selection import StratifiedKFold

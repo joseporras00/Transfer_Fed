@@ -5,7 +5,6 @@ from sklearn.metrics import roc_curve
 from metricas import model_evaluation
 from preparas_SEQ import generate_data_semanal
 from sklearn.utils.class_weight import compute_class_weight
-from metricas import model_evaluation
 from redes import bilstm
 from sklearn.model_selection import StratifiedKFold
 from keras_preprocessing.sequence import pad_sequences
@@ -62,9 +61,7 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
     class_weights: The `class_weights` parameter is a dictionary that assigns weights to each class in the target variable.
     aucs: list that stores the AUC (Area Under the Curve) values for each fold of the cross-validation.
     n_folds: The number of folds for cross-validation.
-    X_val: X_val is the validation data, which is used to evaluate the model's performance during
-        training. It is a separate set of data that is not used for training the model but is used to
-        monitor the model's progress and make decisions on when to stop training (early stopping)
+    X_val: X_val is the validation data used to monitor the model's progress and make decisions on early stopping
     y_val: The parameter `y_val` is the validation target variable.
     
     Return:
