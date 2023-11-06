@@ -7,8 +7,6 @@ from metricas import model_evaluation
 from preparas_SEQ import generate_data_semanal
 from sklearn.utils.class_weight import compute_class_weight
 from redes import bilstm
-from sklearn.model_selection import StratifiedKFold
-from keras_preprocessing.sequence import pad_sequences
 import tensorflow
 
 EPOCHS=150
@@ -26,13 +24,6 @@ for i in range(10):
     X2, y2 = generate_data_semanal('dataset2')
     X3, y3 = generate_data_semanal('dataset3')
 
-    # findi the maximum sequence length among all sequences and pad all the sequences to have the same length.
-    max_seq = max(max(len(seq) for seq in X), max(len(seq) for seq in X2), max(len(seq) for seq in X3))
-    special_value=-10.0
-    X = pad_sequences(X, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-    X2 = pad_sequences(X2, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-    X3 = pad_sequences(X3, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
     # Split the test set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=i, stratify=y)
     X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2,random_state=i, stratify=y2)
@@ -41,10 +32,6 @@ for i in range(10):
     # Concatenate X and y of the three datasets
     X = np.concatenate((X_train, X2_train, X3_train), axis=0)
     y = np.concatenate((y_train, y2_train, y3_train), axis=0)
-
-    #max_seq=max(len(elem) for elem in X)
-    #special_value=-10.0
-    #X = pad_sequences(X, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
 
     #Compute class weights
     class_weights = compute_class_weight(class_weight ='balanced',classes =np.unique(y),y=y)

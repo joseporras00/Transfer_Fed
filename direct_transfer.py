@@ -24,19 +24,6 @@ X, y = generate_data_semanal('dataset1')
 X2, y2 = generate_data_semanal('dataset2')
 X3, y3 = generate_data_semanal('dataset3')
 
-# padding the sequences to have the same length
-max_seq=max(len(elem) for elem in X)
-special_value=-10.0
-X = pad_sequences(X, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
-max_seq=max(len(elem) for elem in X2)
-special_value=-10.0
-X2 = pad_sequences(X2, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
-max_seq=max(len(elem) for elem in X3)
-special_value=-10.0
-X3 = pad_sequences(X3, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
 # split data into training and val set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42, stratify=y)
 X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y2, test_size=0.2,random_state=42, stratify=y2)

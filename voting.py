@@ -26,19 +26,6 @@ X, y = generate_data_semanal('dataset1')
 X2, y2 = generate_data_semanal('dataset2')
 X3, y3 = generate_data_semanal('dataset3')
 
-# padding the sequences to have the same length
-max_seq=max(len(elem) for elem in X)
-special_value=-10.0
-X = pad_sequences(X, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
-max_seq=max(len(elem) for elem in X2)
-special_value=-10.0
-X2 = pad_sequences(X2, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
-max_seq=max(len(elem) for elem in X3)
-special_value=-10.0
-X3 = pad_sequences(X3, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
-
 def evaluate_model(X, y, aucs, n_folds=10, X_val=None, y_val=None):
     """
     The function performs k-fold cross-validation on a given dataset using soft voting

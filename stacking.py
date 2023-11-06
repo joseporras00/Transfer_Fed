@@ -21,14 +21,8 @@ es = tensorflow.keras.callbacks.EarlyStopping(monitor='val_auc', verbose=1,patie
 auc=[]
 ########################################################################
 
-#  define the data for the entity (dataset1), (dataset2), (dataset3)
-# change to test other dataset
+#  define the data for the entity change to test other datase (dataset1), (dataset2), (dataset3)
 X, y = generate_data_semanal('dataset1')
-
-# padding the sequences to have the same length
-max_seq=max(len(elem) for elem in X)
-special_value=-10.0
-X = pad_sequences(X, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
 
 # split train and val sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42, stratify=y)
