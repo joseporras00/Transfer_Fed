@@ -19,8 +19,9 @@ es = tensorflow.keras.callbacks.EarlyStopping(monitor='val_auc', verbose=1,patie
 auc=[]
 ########################################################################
 
+# 10-fold cross-validation loop
 for i in range(10):
-    # Define the data
+    # Define the data for each entity
     X, y = generate_data_semanal('dataset1')
     X2, y2 = generate_data_semanal('dataset2')
     X3, y3 = generate_data_semanal('dataset3')
@@ -63,13 +64,13 @@ for i in range(10):
     th=t[np.argmax(tp_r - fp_r)]
     y_pred = np.where(y_pred>th,1,0)
             
-    aucs=model_evaluation(X_train, y_train, X3_test, y3_test, model, y_pred)
+    aucs=model_evaluation(y3_test, y_pred)
             
     # save results
     auc.append(aucs)
 
 
-# Results
+# print results
 print('*'*60)
 print('Resultados')
 print(f'Mean AUC: {sum(auc) / len(auc)}')

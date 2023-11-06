@@ -34,6 +34,16 @@ def batch_data(data_shard, bs=BATCH):
     return dataset.shuffle(len(label)).batch(bs)
 
 def weight_scalling_factor(clients_trn_data, client_name):
+    """
+    The function calculates the weight scaling factor for a specific client based on the total number of
+    data points held by that client and the total number of data points across all clients.
+    
+    clients_trn_data: dictionary where the keys are client names and the values are the training data for each client. 
+    client_name: name of the client for which you want to calculate the weight scaling factor
+    
+    Return: the weight scaling factor, which is the ratio of the total number of data points held by a
+    specific client to the total number of data points across all clients.
+    """
     client_names = list(clients_trn_data.keys())
     #get the bs
     bs = list(clients_trn_data[client_name])[0][0].shape[0]
@@ -45,7 +55,15 @@ def weight_scalling_factor(clients_trn_data, client_name):
 
 
 def scale_model_weights(weight, scalar):
-    '''function for scaling a models weights'''
+    """
+    Scale the weights of a model.
+    
+    weight: list of numbers representing the weights of a model
+    scalar: number that will be used to scale the model's weights
+    
+    Return:
+    a list of scaled weights.
+    """
     weight_final = []
     steps = len(weight)
     for i in range(steps):
@@ -55,7 +73,15 @@ def scale_model_weights(weight, scalar):
 
 
 def sum_scaled_weights(scaled_weight_list):
-    '''Return the sum of the listed scaled weights. The is equivalent to scaled avg of the weights'''
+    """
+    The function calculates the average gradient across all client gradients and returns the sum of the
+    listed scaled weights.
+    
+    scaled_weight_list: list of lists. Each list represents the scaled weights for a particular layer. 
+    
+    Return: 
+    a list of average gradients.
+    """
     avg_grad = list()
     #get the average grad accross all client gradients
     for grad_list_tuple in zip(*scaled_weight_list):
@@ -69,7 +95,7 @@ X, y = generate_data_semanal('dataset1')
 X2, y2 = generate_data_semanal('dataset2')
 X3, y3 = generate_data_semanal('dataset3')
 
-# padding the sequences to have the same length
+# Padding the sequences to have the same length
 max_seq=max(len(elem) for elem in X)
 special_value=-10.0
 X = pad_sequences(X, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
@@ -82,6 +108,7 @@ max_seq=max(len(elem) for elem in X3)
 special_value=-10.0
 X3 = pad_sequences(X3, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
 
+# evaluation
 for rs in range(10):
     # Split the test set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=rs, stratify=y)
@@ -101,7 +128,7 @@ for rs in range(10):
         'client3': batch_data((X3_train, y3_train))
     }
 
-    #Compute class weights
+    #C ompute class weights
     class_weights1 = compute_class_weight(class_weight ='balanced',classes =np.unique(y_train),y=y_train)
     class_weights1 = dict(zip(np.unique(y_train), class_weights1))
 
@@ -111,18 +138,21 @@ for rs in range(10):
     class_weights3 = compute_class_weight(class_weight ='balanced',classes =np.unique(y3_train),y=y3_train)
     class_weights3 = dict(zip(np.unique(y3_train), class_weights3))
 
+   # The `class_weights` dictionary used to assign different weights to each class in the training
+   # data for each client. 
     class_weights = {
-        'client1': class_weights1,  # Pesos de clase para el cliente 1
-        'client2': class_weights2,   # Pesos de clase para el cliente 2
-        'client3': class_weights3,   # Pesos de clase para el cliente 2
-        # Agrega más pesos de clase para otros clientes si es necesario
+        'client1': class_weights1, 
+        'client2': class_weights2,  
+        'client3': class_weights3, 
     }
 
     # Define the global model
     global_model = bilstm()
+    
+    # Define rounds, 1 because we use all the dats
     comms_round = 1
 
-    # Training loop
+    # Federated Learning Training loop
     for comm_round in range(comms_round):
         global_weights = global_model.get_weights()
         scaled_local_weight_list = []
@@ -153,8 +183,9 @@ for rs in range(10):
         global_model.set_weights(average_weights)
         K.clear_session()
     
-    #predict final model
-    y_pred=global_model.predict(X3_test) #change between (X_test,y_test), (X2_test,y2_test) and (X3_test,y3_test) to test the different datasets
+    # prediction for final model change between (X_test,y_test), (X2_test,y2_test) and (X3_test,y3_test) 
+    # to test the different datasets
+    y_pred=global_model.predict(X3_test) 
     
     # calculate optimal threshold
     fp_r, tp_r, t = roc_curve(y3_test, y_pred)
@@ -163,11 +194,11 @@ for rs in range(10):
         
     aucs=model_evaluation(y3_test, y_pred)
         
-    # Guardar resultados
+    # save results
     auc.append(aucs)
 
 
-# Imprime los resultados
+# print results
 print('*'*60)
 print('Results')
 print(f'Mean AUC: {sum(auc) / len(auc)}')

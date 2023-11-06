@@ -53,6 +53,18 @@ class_weights3 = compute_class_weight(class_weight ='balanced',classes =np.uniqu
 class_weights3 = dict(zip(np.unique(y3_train), class_weights3))
 
 def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None):
+    """
+    The function performs k-fold cross-validation on a given dataset using a specified
+    model, and returns the training histories and AUC scores for each fold.
+    
+    X: The input features for the model
+    y:The target variable or the labels of the data. 
+    class_weights: Dictionary that assigns weights to each class in the target variable. 
+    aucs: List that stores the calculated AUC (Area Under the Curve) values for each fold of the cross-validation. 
+    n_folds: The number of folds for cross-validation. Defaults to 10 (optional)
+    X_val: Validation data, which is used to make decisions on when to stop training (early stopping) 
+    y_val: The validation set labels. 
+    """
     histories = list()
     kfold = StratifiedKFold(n_folds, shuffle=True, random_state=1)
     # enumerate splits
@@ -68,8 +80,9 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
         #model=None
         model=load_model('model1.h5') #Change between model1, model2 and model3
         
+        # retrain to tune the model
         history = model.fit(X_train,y_train,batch_size=BATCH,epochs=EPOCHS,validation_data=(X_val,y_val),callbacks=[es], verbose=0
-        ,class_weight=class_weights) # retrain to tune the model
+        ,class_weight=class_weights) 
         
         # predict test data
         y_pred=model.predict(X_test)
@@ -79,7 +92,7 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
         th=t[np.argmax(tp_r - fp_r)]
         y_pred = np.where(y_pred>th,1,0)
         
-        auc=model_evaluation(X_train, y_train, X_test, y_test, model, y_pred)
+        auc=model_evaluation(y_test, y_pred)
         
         # save resuls
         aucs.append(auc)
@@ -88,7 +101,7 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
 
 
 histories, auc = evaluate_model(X_train, y_train, class_weights1, auc, X_val=X_test, y_val=y_test)
-# print results
+# print results in dataset1
 print('*'*60)
 print('Results Dataset1')
 print(f'Mean AUC: {sum(auc) / len(auc)}')
@@ -99,7 +112,7 @@ auc=[]
 ########################################################################
 
 histories, auc = evaluate_model(X2_train, y2_train, class_weights2, auc, X_val=X2_test, y_val=y2_test)
-# print results
+# print results in dataset2
 print('*'*60)
 print('Results Dataset2')
 print(f'Mean AUC: {sum(auc) / len(auc)}')
@@ -110,8 +123,7 @@ auc=[]
 ########################################################################
 
 histories, auc = evaluate_model(X3_train, y3_train, class_weights3, auc, X_val=X3_test, y_val=y3_test)
-
-# print results
+# print results in dataset3
 print('*'*60)
 print('Resuls Dataset3')
 print(f'Mean AUC: {sum(auc) / len(auc)}')

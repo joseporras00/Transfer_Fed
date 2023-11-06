@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn import metrics
 from sklearn.metrics import roc_curve
 from metricas import model_evaluation
 from preparas_SEQ import generate_data_semanal
@@ -53,7 +52,16 @@ class_weights2 = dict(zip(np.unique(y2_train), class_weights2))
 class_weights3 = compute_class_weight(class_weight ='balanced',classes =np.unique(y3_train),y=y3_train)
 class_weights3 = dict(zip(np.unique(y3_train), class_weights3))
 
-def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None):
+def evaluate_model(X, y, aucs, n_folds=10):
+    """
+    The functionperforms k-fold cross-validation on a given dataset and evaluates the
+    performance of a model for each fold.
+    
+    X: The input features for the model
+    y: The target variable or the labels for the data
+    aucs: List that stores the calculated AUC (Area Under the Curve) values for each fold.
+    n_folds: The number of folds for cross-validation. Defaults to 10 (optional)
+    """
     histories = list()
     kfold = StratifiedKFold(n_folds, shuffle=True, random_state=1)
     # enumerate splits
@@ -77,7 +85,7 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
         th=t[np.argmax(tp_r - fp_r)]
         y_pred = np.where(y_pred>th,1,0)
         
-        auc=model_evaluation(X_train, y_train, X_test, y_test, model, y_pred)
+        auc=model_evaluation(y_test, y_pred)
         
         # save resuls
         aucs.append(auc)
@@ -85,7 +93,7 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
     return histories, aucs
 
 
-histories, auc = evaluate_model(X_train, y_train, class_weights1, auc, X_val=X_test, y_val=y_test)
+histories, auc = evaluate_model(X_train, y_train)
 # print results
 print('*'*60)
 print('Results Dataset1')
@@ -96,7 +104,7 @@ print(f'STD AUC: {np.std(auc)}')
 auc=[]
 ########################################################################
 
-histories, auc = evaluate_model(X2_train, y2_train, class_weights2, auc, X_val=X2_test, y_val=y2_test)
+histories, auc = evaluate_model(X2_train, y2_train)
 # print results
 print('*'*60)
 print('Results Dataset2')
@@ -107,8 +115,7 @@ print(f'STD AUC: {np.std(auc)}')
 auc=[]
 ########################################################################
 
-histories, auc = evaluate_model(X3_train, y3_train, class_weights3, auc, X_val=X3_test, y_val=y3_test)
-
+histories, auc = evaluate_model(X3_train, y3_train)
 # print results
 print('*'*60)
 print('Resuls Dataset3')

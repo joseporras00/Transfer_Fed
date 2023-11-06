@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn import metrics
-from sklearn.metrics import roc_curve
 from metricas import model_evaluation
 from preparas_SEQ import generate_data_semanal
 from sklearn.utils.class_weight import compute_class_weight
@@ -11,8 +9,6 @@ from redes import *
 from sklearn.model_selection import StratifiedKFold
 from keras_preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
-from tensorflow.keras.layers import Concatenate
-from tensorflow.keras.models import Model
 import tensorflow.keras.backend as K
 import tensorflow
 import time
@@ -25,6 +21,7 @@ es = tensorflow.keras.callbacks.EarlyStopping(monitor='val_auc', verbose=1,patie
 auc=[]
 ########################################################################
 
+#  define the data for the entity (dataset1), (dataset2), (dataset3)
 # change to test other dataset
 X, y = generate_data_semanal('dataset1')
 
@@ -50,7 +47,7 @@ outputs1 = model1.predict(X_train)
 outputs2 = model2.predict(X_train)
 outputs3 = model3.predict(X_train)
 
-# concatenate to train dataset
+# concatenate to train matrix data
 new_data_matrix = []
 for i in range(len(X_train)):
     sample = X_train[i]
@@ -72,7 +69,7 @@ outputs1 = model1.predict(X_test)
 outputs2 = model2.predict(X_test)
 outputs3 = model3.predict(X_test)
 
-# concatenate to test dataset
+# concatenate to test matrix data
 new_data_matrix = []
 for i in range(len(X_test)):
     sample = X_test[i]
@@ -89,13 +86,24 @@ for i in range(len(X_test)):
 # convert to array
 X_test= np.array(new_data_matrix)
 
-def evaluate_model(X, y, X_test, y_test, aucs, n_folds=10):
+def evaluate_model(X, y, X_val, y_val, aucs, n_folds=10):
+    """
+    The function performs k-fold cross-validation, trains a model on each fold, makes
+    predictions on a test set, and evaluates the model's.
+    
+    X: The input features for training the model
+    y: The target variable for the training data.
+    X_test: X_test is the input data for testing the model.
+    y_test: The parameter `y_test` is the true labels for the test set.
+    aucs: list that is used to store the AUC (Area Under the Curve) values for each fold of the cross-validation
+    n_folds: number of folds to be used. In this case, it is set to 10 (optional).
+    """
     kfold = StratifiedKFold(n_folds, shuffle=True, random_state=1)
     # enumerate splits
     for train_ix, test_ix in kfold.split(X, y):  
         print('KFOLD------------------------------------')      
         # select rows for train and test
-        X_train, y_train, X_val, y_val =  X[train_ix], y[train_ix], X[test_ix], y[test_ix]  
+        X_train, y_train, X_test, y_test =  X[train_ix], y[train_ix], X[test_ix], y[test_ix]  
         unique, counts = np.unique(y_train, return_counts=True)
         dic=dict(zip(unique, counts))
         print(dic)
@@ -110,14 +118,14 @@ def evaluate_model(X, y, X_test, y_test, aucs, n_folds=10):
         y_pred=combined_model.predict(X_test)
         y_pred=np.round(y_pred)
         
-        auc=model_evaluation(X_train, y_train, X_test, y_test, combined_model, y_pred)
+        auc=model_evaluation(y_test, y_pred)
         
         # save resuls
         aucs.append(auc)
         
 evaluate_model(X_train, y_train, X_test, y_test, auc)
 
-# Imprime los resultados
+# print results
 print('*'*60)
 print('Results:')
 print(f'Mean AUC: {sum(auc) / len(auc)}')

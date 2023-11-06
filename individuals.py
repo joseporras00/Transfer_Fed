@@ -17,7 +17,7 @@ VS=0.25
 es = tensorflow.keras.callbacks.EarlyStopping(monitor='val_auc', verbose=1,patience=10,mode='max',restore_best_weights=True)
 auc=[]
 
-# Define the data for each client
+# Define the data for each entity
 X, y = generate_data_semanal('dataset1')
 X2, y2 = generate_data_semanal('dataset2')
 X3, y3 = generate_data_semanal('dataset3')
@@ -63,9 +63,6 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
     n_folds: The number of folds for cross-validation.
     X_val: X_val is the validation data used to monitor the model's progress and make decisions on early stopping
     y_val: The parameter `y_val` is the validation target variable.
-    
-    Return:
-    `histories` and `aucs`.
     """
     histories = list()
     kfold = StratifiedKFold(n_folds, shuffle=True, random_state=1)
@@ -91,7 +88,7 @@ def evaluate_model(X, y, class_weights, aucs, n_folds=10, X_val=None, y_val=None
         th=t[np.argmax(tp_r - fp_r)]
         y_pred = np.where(y_pred>th,1,0)
         
-        auc=model_evaluation(X_train, y_train, X_test, y_test, model, y_pred)
+        auc=model_evaluation(y_test, y_pred)
         
         # Save results
         aucs.append(auc)

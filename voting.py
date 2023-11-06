@@ -40,6 +40,17 @@ special_value=-10.0
 X3 = pad_sequences(X3, maxlen=max_seq,dtype='float', padding='post', truncating='post', value=special_value)
 
 def evaluate_model(X, y, aucs, n_folds=10, X_val=None, y_val=None):
+    """
+    The function performs k-fold cross-validation on a given dataset using soft voting
+    and returns the evaluation histories and AUC scores.
+    
+    X: The input features for the model
+    y: The target variable or labels for the dataset
+    aucs: list that stores the AUC (Area Under the Curve) values for each fold of the cross-validation.
+    n_folds: The number of folds for cross-validation. The default value is 10 (optional).
+    X_val: The validation set features
+    y_val: The target variable for the validation set.
+    """
     histories = list()
     kfold = StratifiedKFold(n_folds, shuffle=True, random_state=1)
     # enumerate splits
@@ -67,7 +78,7 @@ def evaluate_model(X, y, aucs, n_folds=10, X_val=None, y_val=None):
         y_pred=y_pred/len(models)
         y_pred=np.round(y_pred)
         
-        auc=model_evaluation(X_train, y_train, X_test, y_test, model, y_pred)
+        auc=model_evaluation(y_test, y_pred)
         
         # Guardar resultados
         aucs.append(auc)
@@ -75,9 +86,9 @@ def evaluate_model(X, y, aucs, n_folds=10, X_val=None, y_val=None):
     return histories, aucs
 
 
-histories, auc = evaluate_model(X, y, auc) # change between (X2,y2) and (X3,y3)
+histories, auc = evaluate_model(X, y, auc) # change between (X,y), (X2,y2) and (X3,y3)
 
-# Imprime los resultados
+# print results
 print('*'*60)
 print('Results')
 print(f'Mean AUC: {sum(auc) / len(auc)}')
